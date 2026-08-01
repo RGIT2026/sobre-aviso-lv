@@ -9,37 +9,35 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; min-height: 100vh; }
         .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden; }
         .header { background: linear-gradient(135deg, #BA113B 0%, #8B0A2E 100%); color: white; padding: 30px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
-        
-        /* CONTAINER DA LOGO COM CONTRASTE BRANCO */
+ 
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo-container { background: white; padding: 8px 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         .logo-section img { height: 50px; width: auto; object-fit: contain; }
-        
+ 
         .header-text h1 { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
         .info-box { background: rgba(255, 255, 255, 0.1); padding: 15px 20px; border-radius: 5px; font-size: 14px; }
         .content { padding: 30px 20px; }
-        
-        /* ALERTA DE EQUIPE ATIVA */
+ 
         .alert-box { background: #BA113B; color: white; padding: 25px; border-radius: 10px; margin-bottom: 30px; text-align: center; box-shadow: 0 8px 25px rgba(186, 17, 59, 0.3); }
         .alert-box h2 { font-size: 28px; margin-bottom: 10px; }
         .alert-box .team-names { font-size: 22px; font-weight: 700; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin: 10px 0; }
-
+ 
         .team-section { margin-bottom: 30px; border: 2px solid #E6E6E6; border-radius: 8px; overflow: hidden; }
         .team-section.active { border: 3px solid #BA113B; }
         .team-header { background: #494947; color: white; padding: 15px 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .team-header.active { background: #BA113B; }
         .badge { background: #FFD700; color: #BA113B; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 700; }
-
+ 
         table { width: 100%; border-collapse: collapse; }
         th { background: #494947; color: white; padding: 12px; text-align: left; font-size: 13px; }
         .active th { background: #BA113B; }
         td { padding: 12px; border-bottom: 1px solid #E6E6E6; font-size: 14px; }
-        
+ 
         .whatsapp-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 12px; background: #25D366; color: white; text-decoration: none; border-radius: 5px; font-size: 12px; font-weight: 600; }
         .whatsapp-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; }
-        
+ 
         .footer { background: #F2F2F2; padding: 20px; text-align: center; color: #666; font-size: 12px; }
-        
+ 
         @media (max-width: 768px) {
             .header { flex-direction: column; text-align: center; }
             table { display: block; overflow-x: auto; }
@@ -51,98 +49,139 @@
     <div class="container">
         <div class="header">
             <div class="logo-section">
-                <!-- Caixa branca adicionada para dar destaque e contraste à logo escura -->
                 <div class="logo-container">
                     <img src="cgbengenharia.png" alt="Logo CGB">
                 </div>
                 <div class="header-text">
                     <h1>SOBREAVISO EQUIPES SKYs</h1>
-                    <p>CGB Engenharia - JULHO 2026</p>
+                    <p id="header-month">CGB Engenharia</p>
                 </div>
             </div>
             <div class="info-box">
                 <strong>Hoje:</strong> <span id="current-date"></span>
             </div>
         </div>
-
+ 
         <div class="content">
             <div id="active-alert"></div>
             <div id="main-content"></div>
         </div>
-
+ 
         <div class="footer">
             <p>Sistema de Sobreaviso Automático | CGB Engenharia</p>
         </div>
     </div>
-
+ 
     <script>
-        // BASE DE DADOS ATUALIZADA - JULHO 2026
-        const scales = [
+        // ================================================================
+        // EQUIPES — ordem fixa do rodízio. Para adicionar/trocar equipe,
+        // edite só aqui. A ordem definida abaixo é a ordem do rodízio.
+        // ================================================================
+        const teams = [
             {
-                start: "2026-07-04", end: "2026-07-05", display: "04/07 e 05/07/2026",
+                prefix: "MA-PDT-V001M",
                 members: [
-                    { name: "MARCIRIO CESAR VIANA DA SILVA NETO", phone: "(99) 985451637", prefix: "MA-PDT-V001M" },
-                    { name: "ATAIDES DA SILVA", phone: "(99) 991270267", prefix: "MA-PDT-V001M" },
-                    { name: "MARCELO DIAS MIRANDA", phone: "(99) 991466209", prefix: "MA-PDT-V001M" },
-                    { name: "WALEF SILVA PEREIRA", phone: "(99) 985286010", prefix: "MA-PDT-V001M" }
+                    { name: "MARCIRIO CESAR VIANA DA SILVA NETO", phone: "(99) 985451637" },
+                    { name: "ATAIDES DA SILVA", phone: "(99) 991270267" },
+                    { name: "MARCELO DIAS MIRANDA", phone: "(99) 991466209" },
+                    { name: "WALEF SILVA PEREIRA", phone: "(99) 985286010" }
                 ]
             },
             {
-                start: "2026-07-11", end: "2026-07-12", display: "11/07 e 12/07/2026",
+                prefix: "PDS350",
                 members: [
-                    { name: "FERNANDO MELO DA COSTA", phone: "(99) 8484-4299", prefix: "PDS350" },
-                    { name: "MARCOS ANDRE DE SOUSA ARAUJO", phone: "", prefix: "PDS350" },
-                    { name: "TENILSON DE FIGUEIREDO LIMA", phone: "", prefix: "PDS350" },
-                    { name: "CIDIVAN DE ALMEIDA SILVA", phone: "", prefix: "PDS350" },
-                    { name: "DANRLEY MORAIS DA SILVA", phone: "", prefix: "PDS350" }
+                    { name: "FERNANDO MELO DA COSTA", phone: "(99) 8484-4299" },
+                    { name: "MARCOS ANDRE DE SOUSA ARAUJO", phone: "" },
+                    { name: "TENILSON DE FIGUEIREDO LIMA", phone: "" },
+                    { name: "CIDIVAN DE ALMEIDA SILVA", phone: "" },
+                    { name: "DANRLEY MORAIS DA SILVA", phone: "" }
                 ]
             },
             {
-                start: "2026-07-18", end: "2026-07-19", display: "18/07 e 19/07/2026",
+                prefix: "MA-PDT-V002M",
                 members: [
-                    { name: "GERALDO MOREIRA RODRIGUES", phone: "(99) 991176663", prefix: "MA-PDT-V002M" },
-                    { name: "RICARDO DA CONCEICAO ARAUJO", phone: "(99) 991128854", prefix: "MA-PDT-V002M" },
-                    { name: "LUIS WALLAS CRUZ OLIVEIRA", phone: "(93) 984358047", prefix: "MA-PDT-V002M" },
-                    { name: "MAILSON MARTINS PEREIRA", phone: "(99) 981597049", prefix: "MA-PDT-V002M" },
+                    { name: "GERALDO MOREIRA RODRIGUES", phone: "(99) 991176663" },
+                    { name: "RICARDO DA CONCEICAO ARAUJO", phone: "(99) 991128854" },
+                    { name: "LUIS WALLAS CRUZ OLIVEIRA", phone: "(93) 984358047" },
+                    { name: "MAILSON MARTINS PEREIRA", phone: "(99) 981597049" }
                 ]
             },
             {
-                start: "2026-07-25", end: "2026-07-26", display: "25/07 e 26/07/2026",
+                prefix: "MA-BDC-V001M",
                 members: [
-                    { name: "JARBEM ROSA SOUSA", phone: "(98) 970111629", prefix: "MA-BDC-V001M" },
-                    { name: "RAILTON SILVA", phone: "(99) 988180010", prefix: "MA-BDC-V001M" },
-                    { name: "FRANCISCO DE ASSIS ROCHA", phone: "(98) 988113760", prefix: "MA-BDC-V001M" },
-                    { name: "LUIS FELIPE DOS SANTOS", phone: "(89) 995978598", prefix: "MA-BDC-V001M" },
-                    { name: "ANTONIO MARCOS MERCES SANTOS", phone: "(91) 985948142", prefix: "MA-BDC-V001M" }
+                    { name: "JARBEM ROSA SOUSA", phone: "(98) 970111629" },
+                    { name: "RAILTON SILVA", phone: "(99) 988180010" },
+                    { name: "FRANCISCO DE ASSIS ROCHA", phone: "(98) 988113760" },
+                    { name: "LUIS FELIPE DOS SANTOS", phone: "(89) 995978598" },
+                    { name: "ANTONIO MARCOS MERCES SANTOS", phone: "(91) 985948142" }
                 ]
             }
         ];
-
+ 
+        // Sábado do primeiro fim de semana já escalado (âncora do rodízio).
+        // NÃO precisa mudar isso todo mês — é só o ponto de partida do ciclo.
+        const ANCHOR_SATURDAY = "2026-07-04"; // equipe teams[0] nesse fim de semana
+ 
+        // Quantos fins de semana gerar a partir de hoje (pra frente e um pouco pra trás)
+        const WEEKS_BACK = 1;
+        const WEEKS_FORWARD = 10;
+ 
+        function toDate(str) { return new Date(str + "T00:00:00"); }
+        function addDays(date, days) {
+            const d = new Date(date);
+            d.setDate(d.getDate() + days);
+            return d;
+        }
+        function fmt(date) {
+            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        }
+        function toISO(date) {
+            return date.toISOString().split('T')[0];
+        }
+ 
+        function buildScales() {
+            const anchor = toDate(ANCHOR_SATURDAY);
+            const today = new Date();
+            // índice do fim de semana mais próximo de hoje, relativo à âncora
+            const diffWeeks = Math.round((today - anchor) / (7 * 24 * 60 * 60 * 1000));
+ 
+            const scales = [];
+            for (let i = diffWeeks - WEEKS_BACK; i <= diffWeeks + WEEKS_FORWARD; i++) {
+                const saturday = addDays(anchor, i * 7);
+                const sunday = addDays(saturday, 1);
+                const team = teams[((i % teams.length) + teams.length) % teams.length];
+                scales.push({
+                    start: toISO(saturday),
+                    end: toISO(sunday),
+                    display: `${fmt(saturday)} e ${fmt(sunday)}/${sunday.getFullYear()}`,
+                    prefix: team.prefix,
+                    members: team.members.map(m => ({ ...m, prefix: team.prefix }))
+                });
+            }
+            return scales;
+        }
+ 
         function isWeekendActive(startDateStr, endDateStr) {
             const today = new Date();
-            const dayOfWeek = today.getDay(); // 0 = Domingo, 6 = Sábado
-            
-            if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-                return false;
-            }
-
+            const dayOfWeek = today.getDay();
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) return false;
             const start = new Date(startDateStr + "T00:00:00");
             const end = new Date(endDateStr + "T23:59:59");
-
             return today >= start && today <= end;
         }
-
+ 
         function render() {
+            const scales = buildScales();
             const container = document.getElementById('main-content');
             const alertBox = document.getElementById('active-alert');
             let activeFound = false;
-
+ 
             container.innerHTML = "";
             alertBox.innerHTML = "";
-
+ 
             scales.forEach((scale) => {
                 const isActive = isWeekendActive(scale.start, scale.end);
-                
+ 
                 if (isActive) {
                     activeFound = true;
                     alertBox.innerHTML = `
@@ -154,11 +193,11 @@
                         </div>
                     `;
                 }
-
+ 
                 const html = `
                     <div class="team-section ${isActive ? 'active' : ''}">
                         <div class="team-header ${isActive ? 'active' : ''}">
-                            <span>📅 FIM DE SEMANA: ${scale.display}</span>
+                            <span>📅 FIM DE SEMANA: ${scale.display} — ${scale.prefix}</span>
                             ${isActive ? '<span class="badge">🔴 SOBREAVISO ATIVO</span>' : ''}
                         </div>
                         <table>
@@ -195,7 +234,7 @@
                 `;
                 container.innerHTML += html;
             });
-
+ 
             if (!activeFound) {
                 alertBox.innerHTML = `
                     <div style="padding: 25px; text-align: center; color: #494947; background: #E6E6E6; border-radius: 10px; margin-bottom: 30px; border: 1px dashed #BA113B; font-weight: 600;">
@@ -203,9 +242,13 @@
                     </div>`;
             }
         }
-
-        document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+ 
+        const today = new Date();
+        document.getElementById('current-date').textContent = today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+        document.getElementById('header-month').textContent =
+            "CGB Engenharia - " + today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
         render();
     </script>
 </body>
 </html>
+

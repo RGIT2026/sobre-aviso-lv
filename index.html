@@ -9,35 +9,35 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; min-height: 100vh; }
         .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden; }
         .header { background: linear-gradient(135deg, #BA113B 0%, #8B0A2E 100%); color: white; padding: 30px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
- 
+
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo-container { background: white; padding: 8px 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         .logo-section img { height: 50px; width: auto; object-fit: contain; }
- 
+
         .header-text h1 { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
         .info-box { background: rgba(255, 255, 255, 0.1); padding: 15px 20px; border-radius: 5px; font-size: 14px; }
         .content { padding: 30px 20px; }
- 
+
         .alert-box { background: #BA113B; color: white; padding: 25px; border-radius: 10px; margin-bottom: 30px; text-align: center; box-shadow: 0 8px 25px rgba(186, 17, 59, 0.3); }
         .alert-box h2 { font-size: 28px; margin-bottom: 10px; }
         .alert-box .team-names { font-size: 22px; font-weight: 700; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin: 10px 0; }
- 
+
         .team-section { margin-bottom: 30px; border: 2px solid #E6E6E6; border-radius: 8px; overflow: hidden; }
         .team-section.active { border: 3px solid #BA113B; }
         .team-header { background: #494947; color: white; padding: 15px 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .team-header.active { background: #BA113B; }
         .badge { background: #FFD700; color: #BA113B; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 700; }
- 
+
         table { width: 100%; border-collapse: collapse; }
         th { background: #494947; color: white; padding: 12px; text-align: left; font-size: 13px; }
         .active th { background: #BA113B; }
         td { padding: 12px; border-bottom: 1px solid #E6E6E6; font-size: 14px; }
- 
+
         .whatsapp-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 12px; background: #25D366; color: white; text-decoration: none; border-radius: 5px; font-size: 12px; font-weight: 600; }
         .whatsapp-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; }
- 
+
         .footer { background: #F2F2F2; padding: 20px; text-align: center; color: #666; font-size: 12px; }
- 
+
         @media (max-width: 768px) {
             .header { flex-direction: column; text-align: center; }
             table { display: block; overflow-x: auto; }
@@ -61,17 +61,17 @@
                 <strong>Hoje:</strong> <span id="current-date"></span>
             </div>
         </div>
- 
+
         <div class="content">
             <div id="active-alert"></div>
             <div id="main-content"></div>
         </div>
- 
+
         <div class="footer">
             <p>Sistema de Sobreaviso Automático | CGB Engenharia</p>
         </div>
     </div>
- 
+
     <script>
         const teams = [
             {
@@ -99,7 +99,7 @@
                     { name: "RUBENILSON RODRIGUES DA COSTA LIMA", phone: "(99) 8104-0385" },
                     { name: "FERNANDO SOUSA VIDAL", phone: "(99) 984851637" },
                     { name: "LUIS WALLAS CRUZ OLIVEIRA", phone: "(93) 984358047" },
-                    { name: "MAILSON MARTINS PEREIRA", phone: "(99) 8159-7049" },
+                    { name: "MAILSON MARTINS PEREIRA", phone: "(99) 8159-7049" }
                 ]
             },
             {
@@ -107,9 +107,8 @@
                 members: [
                     { name: "SERGIO BALBINO DE ARAUJO TAVARES", phone: "(71) 983421935" },
                     { name: "LUIS FELIPE DOS SANTOS", phone: "(89) 995978598" },
-                    { name: "ANTONIO MARCOS MERCES SANTOS", phone: "(91) 985498142" }
-                    { name: "RAILTON SILVA", phone: "(99) 98818-0010" },
-                    
+                    { name: "ANTONIO MARCOS MERCES SANTOS", phone: "(91) 985498142" },
+                    { name: "RAILTON SILVA", phone: "(99) 98818-0010" }
                 ]
             }
         ];

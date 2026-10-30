@@ -15,18 +15,30 @@
         .logo-section img { height: 50px; width: auto; object-fit: contain; }
 
         .header-text h1 { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
-        .info-box { background: rgba(255, 255, 255, 0.1); padding: 15px 20px; border-radius: 5px; font-size: 14px; }
+        .info-box { background: rgba(255, 255, 255, 0.1); padding: 15px 20px; border-radius: 5px; font-size: 14px; display: flex; flex-direction: column; gap: 8px; }
+        
+        .search-box { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 6px; }
+        .search-box input { background: white; border: none; padding: 5px 8px; border-radius: 4px; font-size: 13px; color: #333; outline: none; }
+        .search-box button { background: #FFD700; color: #BA113B; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .search-box button:hover { background: #ffea70; }
+        .clear-search { background: rgba(255,255,255,0.2) !important; color: white !important; }
+
         .content { padding: 30px 20px; }
 
         .alert-box { background: #BA113B; color: white; padding: 25px; border-radius: 10px; margin-bottom: 30px; text-align: center; box-shadow: 0 8px 25px rgba(186, 17, 59, 0.3); }
         .alert-box h2 { font-size: 28px; margin-bottom: 10px; }
         .alert-box .team-names { font-size: 22px; font-weight: 700; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin: 10px 0; }
 
-        .team-section { margin-bottom: 30px; border: 2px solid #E6E6E6; border-radius: 8px; overflow: hidden; }
+        .team-section { margin-bottom: 30px; border: 2px solid #E6E6E6; border-radius: 8px; overflow: hidden; transition: all 0.3s ease; }
         .team-section.active { border: 3px solid #BA113B; }
+        .team-section.highlight { border: 3px solid #25D366; box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
+        
         .team-header { background: #494947; color: white; padding: 15px 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .team-header.active { background: #BA113B; }
+        .team-header.highlight { background: #1b9c4c; }
+        
         .badge { background: #FFD700; color: #BA113B; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 700; }
+        .badge-search { background: #FFD700; color: #1b9c4c; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 700; }
 
         table { width: 100%; border-collapse: collapse; }
         th { background: #494947; color: white; padding: 12px; text-align: left; font-size: 13px; }
@@ -58,7 +70,13 @@
                 </div>
             </div>
             <div class="info-box">
-                <strong>Hoje:</strong> <span id="current-date"></span>
+                <div><strong>Hoje:</strong> <span id="current-date"></span></div>
+                <div class="search-box">
+                    <span style="font-size: 13px;">🔍 Buscar data:</span>
+                    <input type="date" id="search-date">
+                    <button onclick="searchWeek()">Localizar</button>
+                    <button class="clear-search" onclick="clearSearch()" title="Limpar busca">✖</button>
+                </div>
             </div>
         </div>
 
@@ -103,9 +121,11 @@
             }
         ];
 
-        const ANCHOR_SATURDAY = "2026-07-04";
-        const WEEKS_BACK = 1;
-        const WEEKS_FORWARD = 10;
+        const ANCHOR_SATURDAY = "2026-10-24"; 
+        const WEEKS_BACK = 26;  // Cerca de 6 meses para trás
+        const WEEKS_FORWARD = 26; // Cerca de 6 meses para frente
+
+        let searchedWeekStart = null;
 
         function toDate(str) { return new Date(str + "T00:00:00"); }
         function addDays(date, days) {
@@ -158,6 +178,48 @@
             return today >= start && today <= end;
         }
 
+        function searchWeek() {
+            const inputVal = document.getElementById('search-date').value;
+            if (!inputVal) {
+                alert("Por favor, selecione uma data.");
+                return;
+            }
+            const selectedDate = toDate(inputVal);
+            const scales = buildScales();
+            
+            // Acha o fim de semana correspondente (Sábado/Domingo)
+            let foundScale = null;
+            for (let scale of scales) {
+                const start = toDate(scale.start);
+                const end = toDate(scale.end);
+                // Se a data buscada cair no sábado ou domingo daquela escala
+                if (selectedDate >= start && selectedDate <= addDays(end, 1)) {
+                    foundScale = scale;
+                    break;
+                }
+            }
+
+            if (foundScale) {
+                searchedWeekStart = foundScale.start;
+                render();
+                // Rolar a tela até o item encontrado
+                setTimeout(() => {
+                    const el = document.getElementById(`scale-${foundScale.start}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+            } else {
+                alert("A data selecionada está fora do intervalo de 6 meses cadastrado.");
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('search-date').value = "";
+            searchedWeekStart = null;
+            render();
+        }
+
         function render() {
             const scales = buildScales();
             const container = document.getElementById('main-content');
@@ -169,8 +231,9 @@
 
             scales.forEach((scale) => {
                 const isActive = isWeekendActive(scale.start, scale.end);
+                const isSearched = searchedWeekStart === scale.start;
 
-                if (isActive) {
+                if (isActive && !searchedWeekStart) {
                     activeFound = true;
                     alertBox.innerHTML = `
                         <div class="alert-box">
@@ -180,13 +243,24 @@
                             <p style="font-size: 14px; opacity: 0.9;">Sobreaviso válido exclusivamente para o Sábado e Domingo atuais.</p>
                         </div>
                     `;
+                } else if (isSearched) {
+                    alertBox.innerHTML = `
+                        <div style="background: #1b9c4c; color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; text-align: center; box-shadow: 0 8px 25px rgba(27, 156, 76, 0.3);">
+                            <h2>🔎 RESULTADO DA BUSCA</h2>
+                            <p>Período: ${scale.display}</p>
+                            <div class="team-names">${scale.prefix} — ${scale.members.map(m => m.name.split(' ')[0]).join(' • ')}</div>
+                        </div>
+                    `;
                 }
 
                 const html = `
-                    <div class="team-section ${isActive ? 'active' : ''}">
-                        <div class="team-header ${isActive ? 'active' : ''}">
+                    <div id="scale-${scale.start}" class="team-section ${isActive ? 'active' : ''} ${isSearched ? 'highlight' : ''}">
+                        <div class="team-header ${isActive ? 'active' : ''} ${isSearched ? 'highlight' : ''}">
                             <span>📅 FIM DE SEMANA: ${scale.display} — ${scale.prefix}</span>
-                            ${isActive ? '<span class="badge">🔴 SOBREAVISO ATIVO</span>' : ''}
+                            <div>
+                                ${isActive ? '<span class="badge">🔴 SOBREAVISO ATIVO</span> ' : ''}
+                                ${isSearched ? '<span class="badge-search">🎯 SELECIONADO</span>' : ''}
+                            </div>
                         </div>
                         <table>
                             <thead>
@@ -223,7 +297,7 @@
                 container.innerHTML += html;
             });
 
-            if (!activeFound) {
+            if (!activeFound && !searchedWeekStart) {
                 alertBox.innerHTML = `
                     <div style="padding: 25px; text-align: center; color: #494947; background: #E6E6E6; border-radius: 10px; margin-bottom: 30px; border: 1px dashed #BA113B; font-weight: 600;">
                         ℹ️ Fora do período de Sobreaviso. O plantão das equipes inicia automaticamente aos Sábados.

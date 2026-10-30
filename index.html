@@ -21,7 +21,7 @@
         .search-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .search-box input { background: white; border: none; padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333; outline: none; font-weight: 500; }
         
-        .btn-action { border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-action { border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 4px; z-index: 10; position: relative; }
         .btn-action:hover { opacity: 0.9; }
         
         .btn-find { background: #FFD700; color: #BA113B; }
@@ -50,7 +50,7 @@
         .active th { background: #BA113B; }
         td { padding: 12px; border-bottom: 1px solid #E6E6E6; font-size: 14px; }
 
-        .whatsapp-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 12px; background: #25D366; color: white; text-decoration: none; border-radius: 5px; font-size: 12px; font-weight: 600; }
+        .whatsapp-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 12px; background: #25D366; color: white; text-decoration: none; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; }
         .whatsapp-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; }
 
         .footer { background: #F2F2F2; padding: 20px; text-align: center; color: #666; font-size: 12px; }
@@ -80,9 +80,9 @@
                 <div><strong>📅 Hoje:</strong> <span id="current-date"></span></div>
                 <div class="search-box">
                     <input type="date" id="search-date">
-                    <button class="btn-action btn-find" onclick="searchWeek()">🔍 Buscar</button>
-                    <button class="btn-action btn-today" onclick="goToToday()">📍 Hoje</button>
-                    <button class="btn-action btn-clear" onclick="clearSearch()" title="Limpar busca">✖</button>
+                    <button type="button" class="btn-action btn-find" onclick="searchWeek()">🔍 Buscar</button>
+                    <button type="button" class="btn-action btn-today" onclick="goToToday()">📍 Hoje</button>
+                    <button type="button" class="btn-action btn-clear" onclick="clearSearch()" title="Limpar busca">✖</button>
                 </div>
             </div>
         </div>
@@ -129,8 +129,8 @@
         ];
 
         const ANCHOR_SATURDAY = "2026-10-24"; 
-        const WEEKS_BACK = 26;  // 6 meses para trás
-        const WEEKS_FORWARD = 26; // 6 meses para frente
+        const WEEKS_BACK = 26;  
+        const WEEKS_FORWARD = 26; 
 
         let searchedWeekStart = null;
 
@@ -178,8 +178,6 @@
 
         function isWeekendActive(startDateStr, endDateStr) {
             const today = new Date();
-            const dayOfWeek = today.getDay();
-            // Considera ativo se for sexta (5), sábado (6) ou domingo (0) do respectivo fim de semana
             const start = new Date(startDateStr + "T00:00:00");
             const fridayBefore = new Date(start);
             fridayBefore.setDate(fridayBefore.getDate() - 1);
@@ -321,7 +319,7 @@
             if (!activeFound && !searchedWeekStart) {
                 alertBox.innerHTML = `
                     <div style="padding: 25px; text-align: center; color: #494947; background: #E6E6E6; border-radius: 10px; margin-bottom: 30px; border: 1px dashed #BA113B; font-weight: 600;">
-                        ℹ️ Fora do período de Sobreaviso.
+                        ℹ️ Visualizando histórico e escalas futuras.
                     </div>`;
             }
         }

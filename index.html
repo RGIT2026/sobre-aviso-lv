@@ -21,7 +21,7 @@
         .search-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .search-box input { background: white; border: none; padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333; outline: none; font-weight: 500; }
         
-        .btn-action { border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 4px; z-index: 10; position: relative; }
+        .btn-action { border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 4px; position: relative; z-index: 10; }
         .btn-action:hover { opacity: 0.9; }
         
         .btn-find { background: #FFD700; color: #BA113B; }
@@ -176,13 +176,11 @@
             return scales;
         }
 
-        // Regra atualizada: Só ativa o sobreaviso a partir das 12:00 do primeiro dia (sábado) até o término de domingo
+        // Ativa o badge vermelho exatamente entre 12h de Sábado e 23:59h de Domingo
         function isWeekendActive(startDateStr, endDateStr) {
-            const today = new Date(); // Data e hora atual do sistema
-            
-            const start = new Date(startDateStr + "T12:00:00"); // Inicia exatamente às 12:00h do sábado
-            const end = new Date(endDateStr + "T23:59:59");     // Termina no domingo às 23:59:59
-
+            const today = new Date(); 
+            const start = new Date(startDateStr + "T12:00:00"); 
+            const end = new Date(endDateStr + "T23:59:59");     
             return today >= start && today <= end;
         }
 
@@ -219,18 +217,43 @@
             }
         }
 
+        // Função "Ir para Hoje" corrigida: Encontra a semana atual pelo dia de hoje e rola até ela
         function goToToday() {
             document.getElementById('search-date').value = "";
-            searchedWeekStart = null;
+            
+            const today = new Date();
+            const scales = buildScales();
+            
+            let currentScale = null;
+            for (let scale of scales) {
+                const start = toDate(scale.start);
+                const end = addDays(toDate(scale.end), 1);
+                
+                // Considera a semana atual mesmo no meio da semana
+                const prevFriday = addDays(start, -1);
+                if (today >= prevFriday && today <= end) {
+                    currentScale = scale;
+                    break;
+                }
+            }
+
+            if (currentScale) {
+                searchedWeekStart = currentScale.start;
+            } else {
+                searchedWeekStart = null;
+            }
+
             render();
 
             setTimeout(() => {
-                const activeEl = document.querySelector('.team-section.active');
-                if (activeEl) {
-                    activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (currentScale) {
+                    const el = document.getElementById(`scale-${currentScale.start}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
                 }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 100);
         }
 
@@ -260,13 +283,13 @@
                             <h2>🚨 EQUIPE EM PLANTÃO NESTE FIM DE SEMANA</h2>
                             <p>Período Ativo: ${scale.display}</p>
                             <div class="team-names">${scale.members.map(m => m.name.split(' ')[0]).join(' • ')}</div>
-                            <p style="font-size: 14px; opacity: 0.9;">Sobreaviso ativo (após as 12h).</p>
+                            <p style="font-size: 14px; opacity: 0.9;">Sobreaviso ativo (após as 12h do Sábado).</p>
                         </div>
                     `;
                 } else if (isSearched) {
                     alertBox.innerHTML = `
                         <div style="background: #1b9c4c; color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; text-align: center; box-shadow: 0 8px 25px rgba(27, 156, 76, 0.3);">
-                            <h2>🔎 RESULTADO DA BUSCA</h2>
+                            <h2>🔎 FIM DE SEMANA SELECIONADO / ATUAL</h2>
                             <p>Período: ${scale.display}</p>
                             <div class="team-names">${scale.prefix} — ${scale.members.map(m => m.name.split(' ')[0]).join(' • ')}</div>
                         </div>
@@ -320,7 +343,7 @@
             if (!activeFound && !searchedWeekStart) {
                 alertBox.innerHTML = `
                     <div style="padding: 25px; text-align: center; color: #494947; background: #E6E6E6; border-radius: 10px; margin-bottom: 30px; border: 1px dashed #BA113B; font-weight: 600;">
-                        ℹ️ Fora do horário de Sobreaviso (Ativa apenas aos sábados a partir das 12h).
+                        ℹ️ Fora do horário de Sobreaviso (Ativa aos sábados a partir das 12:00h).
                     </div>`;
             }
         }

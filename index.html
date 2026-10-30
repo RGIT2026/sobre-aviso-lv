@@ -176,13 +176,14 @@
             return scales;
         }
 
+        // Regra atualizada: Só ativa o sobreaviso a partir das 12:00 do primeiro dia (sábado) até o término de domingo
         function isWeekendActive(startDateStr, endDateStr) {
-            const today = new Date();
-            const start = new Date(startDateStr + "T00:00:00");
-            const fridayBefore = new Date(start);
-            fridayBefore.setDate(fridayBefore.getDate() - 1);
-            const end = new Date(endDateStr + "T23:59:59");
-            return today >= fridayBefore && today <= end;
+            const today = new Date(); // Data e hora atual do sistema
+            
+            const start = new Date(startDateStr + "T12:00:00"); // Inicia exatamente às 12:00h do sábado
+            const end = new Date(endDateStr + "T23:59:59");     // Termina no domingo às 23:59:59
+
+            return today >= start && today <= end;
         }
 
         function searchWeek() {
@@ -259,7 +260,7 @@
                             <h2>🚨 EQUIPE EM PLANTÃO NESTE FIM DE SEMANA</h2>
                             <p>Período Ativo: ${scale.display}</p>
                             <div class="team-names">${scale.members.map(m => m.name.split(' ')[0]).join(' • ')}</div>
-                            <p style="font-size: 14px; opacity: 0.9;">Sobreaviso válido para este fim de semana.</p>
+                            <p style="font-size: 14px; opacity: 0.9;">Sobreaviso ativo (após as 12h).</p>
                         </div>
                     `;
                 } else if (isSearched) {
@@ -319,7 +320,7 @@
             if (!activeFound && !searchedWeekStart) {
                 alertBox.innerHTML = `
                     <div style="padding: 25px; text-align: center; color: #494947; background: #E6E6E6; border-radius: 10px; margin-bottom: 30px; border: 1px dashed #BA113B; font-weight: 600;">
-                        ℹ️ Visualizando histórico e escalas futuras.
+                        ℹ️ Fora do horário de Sobreaviso (Ativa apenas aos sábados a partir das 12h).
                     </div>`;
             }
         }

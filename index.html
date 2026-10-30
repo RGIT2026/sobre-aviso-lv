@@ -21,7 +21,7 @@
         .search-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .search-box input { background: white; border: none; padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333; outline: none; font-weight: 500; }
         
-        .btn-action { border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 4px; position: relative; z-index: 10; }
+        .btn-action { border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 4px; z-index: 10; position: relative; }
         .btn-action:hover { opacity: 0.9; }
         
         .btn-find { background: #FFD700; color: #BA113B; }
@@ -82,7 +82,7 @@
                     <input type="date" id="search-date">
                     <button type="button" class="btn-action btn-find" onclick="searchWeek()">🔍 Buscar</button>
                     <button type="button" class="btn-action btn-today" onclick="goToToday()">📍 Hoje</button>
-                    <button type="button" class="btn-action btn-clear" onclick="clearSearch()" title="Limpar busca">✖</button>
+                    <button type="button" class="btn-action btn-clear" onclick="clearSearch()">✖</button>
                 </div>
             </div>
         </div>
@@ -132,7 +132,7 @@
         const WEEKS_BACK = 26;  
         const WEEKS_FORWARD = 26; 
 
-        let searchedWeekStart = null;
+        let focusedWeekStart = null;
 
         function toDate(str) { return new Date(str + "T00:00:00"); }
         function addDays(date, days) {
@@ -176,12 +176,24 @@
             return scales;
         }
 
-        // Ativa o badge vermelho exatamente entre 12h de Sábado e 23:59h de Domingo
         function isWeekendActive(startDateStr, endDateStr) {
             const today = new Date(); 
             const start = new Date(startDateStr + "T12:00:00"); 
             const end = new Date(endDateStr + "T23:59:59");     
             return today >= start && today <= end;
+        }
+
+        function findScaleForDate(targetDate) {
+            const scales = buildScales();
+            for (let scale of scales) {
+                const start = toDate(scale.start);
+                const end = addDays(toDate(scale.end), 1);
+                const prevFriday = addDays(start, -1);
+                if (targetDate >= prevFriday && targetDate <= end) {
+                    return scale;
+                }
+            }
+            return null;
         }
 
         function searchWeek() {
@@ -190,77 +202,46 @@
                 alert("Por favor, selecione uma data.");
                 return;
             }
-            const selectedDate = toDate(inputVal);
-            const scales = buildScales();
-            
-            let foundScale = null;
-            for (let scale of scales) {
-                const start = toDate(scale.start);
-                const end = toDate(scale.end);
-                if (selectedDate >= start && selectedDate <= addDays(end, 1)) {
-                    foundScale = scale;
-                    break;
-                }
-            }
-
-            if (foundScale) {
-                searchedWeekStart = foundScale.start;
+            const found = findScaleForDate(toDate(inputVal));
+            if (found) {
+                focusedWeekStart = found.start;
                 render();
-                setTimeout(() => {
-                    const el = document.getElementById(`scale-${foundScale.start}`);
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 100);
+                scrollToElement(found.start);
             } else {
                 alert("A data selecionada está fora do intervalo de 6 meses cadastrado.");
             }
         }
 
-        // Função "Ir para Hoje" corrigida: Encontra a semana atual pelo dia de hoje e rola até ela
         function goToToday() {
             document.getElementById('search-date').value = "";
-            
-            const today = new Date();
-            const scales = buildScales();
-            
-            let currentScale = null;
-            for (let scale of scales) {
-                const start = toDate(scale.start);
-                const end = addDays(toDate(scale.end), 1);
-                
-                // Considera a semana atual mesmo no meio da semana
-                const prevFriday = addDays(start, -1);
-                if (today >= prevFriday && today <= end) {
-                    currentScale = scale;
-                    break;
-                }
-            }
-
-            if (currentScale) {
-                searchedWeekStart = currentScale.start;
+            const found = findScaleForDate(new Date());
+            if (found) {
+                focusedWeekStart = found.start;
             } else {
-                searchedWeekStart = null;
+                focusedWeekStart = null;
             }
-
             render();
-
-            setTimeout(() => {
-                if (currentScale) {
-                    const el = document.getElementById(`scale-${currentScale.start}`);
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        return;
-                    }
-                }
+            if (found) {
+                scrollToElement(found.start);
+            } else {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 100);
+            }
         }
 
         function clearSearch() {
             document.getElementById('search-date').value = "";
-            searchedWeekStart = null;
+            focusedWeekStart = null;
             render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToElement(startDate) {
+            setTimeout(() => {
+                const el = document.getElementById(`scale-${startDate}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 150);
         }
 
         function render() {
@@ -274,9 +255,9 @@
 
             scales.forEach((scale) => {
                 const isActive = isWeekendActive(scale.start, scale.end);
-                const isSearched = searchedWeekStart === scale.start;
+                const isFocused = focusedWeekStart === scale.start;
 
-                if (isActive && !searchedWeekStart) {
+                if (isActive && !focusedWeekStart) {
                     activeFound = true;
                     alertBox.innerHTML = `
                         <div class="alert-box">
@@ -286,10 +267,10 @@
                             <p style="font-size: 14px; opacity: 0.9;">Sobreaviso ativo (após as 12h do Sábado).</p>
                         </div>
                     `;
-                } else if (isSearched) {
+                } else if (isFocused && focusedWeekStart) {
                     alertBox.innerHTML = `
                         <div style="background: #1b9c4c; color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; text-align: center; box-shadow: 0 8px 25px rgba(27, 156, 76, 0.3);">
-                            <h2>🔎 FIM DE SEMANA SELECIONADO / ATUAL</h2>
+                            <h2>🎯 PERÍODO EM DESTAQUE</h2>
                             <p>Período: ${scale.display}</p>
                             <div class="team-names">${scale.prefix} — ${scale.members.map(m => m.name.split(' ')[0]).join(' • ')}</div>
                         </div>
@@ -297,12 +278,12 @@
                 }
 
                 const html = `
-                    <div id="scale-${scale.start}" class="team-section ${isActive ? 'active' : ''} ${isSearched ? 'highlight' : ''}">
-                        <div class="team-header ${isActive ? 'active' : ''} ${isSearched ? 'highlight' : ''}">
+                    <div id="scale-${scale.start}" class="team-section ${isActive ? 'active' : ''} ${isFocused ? 'highlight' : ''}">
+                        <div class="team-header ${isActive ? 'active' : ''} ${isFocused ? 'highlight' : ''}">
                             <span>📅 FIM DE SEMANA: ${scale.display} — ${scale.prefix}</span>
                             <div>
                                 ${isActive ? '<span class="badge">🔴 SOBREAVISO ATIVO</span> ' : ''}
-                                ${isSearched ? '<span class="badge-search">🎯 SELECIONADO</span>' : ''}
+                                ${isFocused ? '<span class="badge-search">📍 SELECIONADO</span>' : ''}
                             </div>
                         </div>
                         <table>
@@ -340,7 +321,7 @@
                 container.innerHTML += html;
             });
 
-            if (!activeFound && !searchedWeekStart) {
+            if (!activeFound && !focusedWeekStart) {
                 alertBox.innerHTML = `
                     <div style="padding: 25px; text-align: center; color: #494947; background: #E6E6E6; border-radius: 10px; margin-bottom: 30px; border: 1px dashed #BA113B; font-weight: 600;">
                         ℹ️ Fora do horário de Sobreaviso (Ativa aos sábados a partir das 12:00h).

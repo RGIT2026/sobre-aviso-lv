@@ -15,12 +15,14 @@
         .logo-section img { height: 50px; width: auto; object-fit: contain; }
 
         .header-text h1 { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
-        .info-box { background: rgba(255, 255, 255, 0.1); padding: 15px 20px; border-radius: 5px; font-size: 14px; display: flex; flex-direction: column; gap: 8px; }
+        .info-box { background: rgba(255, 255, 255, 0.1); padding: 15px 20px; border-radius: 5px; font-size: 14px; display: flex; flex-direction: column; gap: 10px; }
         
-        .search-box { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 6px; }
-        .search-box input { background: white; border: none; padding: 5px 8px; border-radius: 4px; font-size: 13px; color: #333; outline: none; }
-        .search-box button { background: #FFD700; color: #BA113B; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; flex-wrap: wrap; }
+        .search-box input { background: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 13px; color: #333; outline: none; }
+        .search-box button { background: #FFD700; color: #BA113B; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: background 0.2s; }
         .search-box button:hover { background: #ffea70; }
+        .btn-today { background: #25D366 !important; color: white !important; }
+        .btn-today:hover { background: #1eb856 !important; }
         .clear-search { background: rgba(255,255,255,0.2) !important; color: white !important; }
 
         .content { padding: 30px 20px; }
@@ -54,6 +56,7 @@
             .header { flex-direction: column; text-align: center; }
             table { display: block; overflow-x: auto; }
             .logo-section { flex-direction: column; gap: 15px; }
+            .search-box { justify-content: center; }
         }
     </style>
 </head>
@@ -72,9 +75,10 @@
             <div class="info-box">
                 <div><strong>Hoje:</strong> <span id="current-date"></span></div>
                 <div class="search-box">
-                    <span style="font-size: 13px;">🔍 Buscar data:</span>
+                    <span style="font-size: 13px;">🔍 Buscar:</span>
                     <input type="date" id="search-date">
                     <button onclick="searchWeek()">Localizar</button>
+                    <button class="btn-today" onclick="goToToday()" title="Ir para o fim de semana atual">📍 Hoje</button>
                     <button class="clear-search" onclick="clearSearch()" title="Limpar busca">✖</button>
                 </div>
             </div>
@@ -122,8 +126,8 @@
         ];
 
         const ANCHOR_SATURDAY = "2026-10-24"; 
-        const WEEKS_BACK = 26;  // Cerca de 6 meses para trás
-        const WEEKS_FORWARD = 26; // Cerca de 6 meses para frente
+        const WEEKS_BACK = 26;  // 6 meses para trás
+        const WEEKS_FORWARD = 26; // 6 meses para frente
 
         let searchedWeekStart = null;
 
@@ -187,12 +191,10 @@
             const selectedDate = toDate(inputVal);
             const scales = buildScales();
             
-            // Acha o fim de semana correspondente (Sábado/Domingo)
             let foundScale = null;
             for (let scale of scales) {
                 const start = toDate(scale.start);
                 const end = toDate(scale.end);
-                // Se a data buscada cair no sábado ou domingo daquela escala
                 if (selectedDate >= start && selectedDate <= addDays(end, 1)) {
                     foundScale = scale;
                     break;
@@ -202,7 +204,6 @@
             if (foundScale) {
                 searchedWeekStart = foundScale.start;
                 render();
-                // Rolar a tela até o item encontrado
                 setTimeout(() => {
                     const el = document.getElementById(`scale-${foundScale.start}`);
                     if (el) {
@@ -212,6 +213,21 @@
             } else {
                 alert("A data selecionada está fora do intervalo de 6 meses cadastrado.");
             }
+        }
+
+        function goToToday() {
+            document.getElementById('search-date').value = "";
+            searchedWeekStart = null;
+            render();
+
+            setTimeout(() => {
+                const activeEl = document.querySelector('.team-section.active');
+                if (activeEl) {
+                    activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }, 100);
         }
 
         function clearSearch() {

@@ -8,34 +8,37 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; min-height: 100vh; }
         .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #BA113B 0%, #8B0A2E 100%); color: white; padding: 30px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .header { background: linear-gradient(135deg, #BA113B 0%, #8B0A2E 100%); color: white; padding: 25px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
 
         .logo-section { display: flex; align-items: center; gap: 20px; }
         .logo-container { background: white; padding: 8px 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         .logo-section img { height: 50px; width: auto; object-fit: contain; }
 
-        .header-text h1 { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
-        .info-box { background: rgba(255, 255, 255, 0.1); padding: 15px 20px; border-radius: 5px; font-size: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .header-text h1 { font-size: 26px; font-weight: 700; margin-bottom: 5px; }
         
-        .search-box { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; flex-wrap: wrap; }
-        .search-box input { background: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 13px; color: #333; outline: none; }
-        .search-box button { background: #FFD700; color: #BA113B; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; transition: background 0.2s; }
-        .search-box button:hover { background: #ffea70; }
-        .btn-today { background: #25D366 !important; color: white !important; }
-        .btn-today:hover { background: #1eb856 !important; }
-        .clear-search { background: rgba(255,255,255,0.2) !important; color: white !important; }
+        .info-box { background: rgba(255, 255, 255, 0.12); padding: 12px 18px; border-radius: 8px; font-size: 14px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.2); }
+        
+        .search-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .search-box input { background: white; border: none; padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333; outline: none; font-weight: 500; }
+        
+        .btn-action { border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-action:hover { opacity: 0.9; }
+        
+        .btn-find { background: #FFD700; color: #BA113B; }
+        .btn-today { background: #25D366; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-clear { background: rgba(255,255,255,0.25); color: white; }
 
         .content { padding: 30px 20px; }
 
         .alert-box { background: #BA113B; color: white; padding: 25px; border-radius: 10px; margin-bottom: 30px; text-align: center; box-shadow: 0 8px 25px rgba(186, 17, 59, 0.3); }
-        .alert-box h2 { font-size: 28px; margin-bottom: 10px; }
-        .alert-box .team-names { font-size: 22px; font-weight: 700; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .alert-box h2 { font-size: 26px; margin-bottom: 10px; }
+        .alert-box .team-names { font-size: 20px; font-weight: 700; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin: 10px 0; }
 
         .team-section { margin-bottom: 30px; border: 2px solid #E6E6E6; border-radius: 8px; overflow: hidden; transition: all 0.3s ease; }
         .team-section.active { border: 3px solid #BA113B; }
         .team-section.highlight { border: 3px solid #25D366; box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         
-        .team-header { background: #494947; color: white; padding: 15px 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .team-header { background: #494947; color: white; padding: 15px 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .team-header.active { background: #BA113B; }
         .team-header.highlight { background: #1b9c4c; }
         
@@ -56,6 +59,7 @@
             .header { flex-direction: column; text-align: center; }
             table { display: block; overflow-x: auto; }
             .logo-section { flex-direction: column; gap: 15px; }
+            .info-box { width: 100%; align-items: center; }
             .search-box { justify-content: center; }
         }
     </style>
@@ -73,13 +77,12 @@
                 </div>
             </div>
             <div class="info-box">
-                <div><strong>Hoje:</strong> <span id="current-date"></span></div>
+                <div><strong>📅 Hoje:</strong> <span id="current-date"></span></div>
                 <div class="search-box">
-                    <span style="font-size: 13px;">🔍 Buscar:</span>
                     <input type="date" id="search-date">
-                    <button onclick="searchWeek()">Localizar</button>
-                    <button class="btn-today" onclick="goToToday()" title="Ir para o fim de semana atual">📍 Hoje</button>
-                    <button class="clear-search" onclick="clearSearch()" title="Limpar busca">✖</button>
+                    <button class="btn-action btn-find" onclick="searchWeek()">🔍 Buscar</button>
+                    <button class="btn-action btn-today" onclick="goToToday()">📍 Hoje</button>
+                    <button class="btn-action btn-clear" onclick="clearSearch()" title="Limpar busca">✖</button>
                 </div>
             </div>
         </div>

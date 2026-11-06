@@ -89,7 +89,7 @@
 
         <div class="content">
             <div id="active-alert"></div>
-            <div id="main-content"></div>
+            <div id="main-content">Carregando escalas...</div>
         </div>
 
         <div class="footer">
@@ -98,40 +98,12 @@
     </div>
 
     <script>
-        const teams = [
-            {
-                prefix: "MA-PDT-V001M",
-                members: [
-                    { name: "MARCIRIO CESAR VIANA DA SILVA NETO", phone: "(99) 985451637" },
-                    { name: "ATAIDES DA SILVA", phone: "(99) 991270267" },
-                    { name: "MARCELO DIAS MIRANDA", phone: "(99) 991466209" },
-                    { name: "WALEF SILVA PEREIRA", phone: "(99) 985286010" }
-                ]
-            },
-            {
-                prefix: "MA-PDT-V002M",
-                members: [
-                    { name: "RUBENILSON RODRIGUES DA COSTA LIMA", phone: "(99) 8104-0385" },
-                    { name: "FERNANDO SOUSA VIDAL", phone: "(99) 984851637" },
-                    { name: "LUIS WALLAS CRUZ OLIVEIRA", phone: "(93) 984358047" },
-                    { name: "MAILSON MARTINS PEREIRA", phone: "(99) 8159-7049" }
-                ]
-            },
-            {
-                prefix: "MA-BDC-V001M",
-                members: [
-                    { name: "JARBEM ROSA SOUSA", phone: "(98) 7011-1629" },
-                    { name: "ANTONIO MARCOS MERCES SANTOS", phone: "(91) 985498142" },
-                    { name: "RAILTON SILVA", phone: "(99) 98818-0010" }
-                ]
-            }
-        ];
-
         const ANCHOR_SATURDAY = "2026-10-24"; 
         const WEEKS_BACK = 26;  
         const WEEKS_FORWARD = 26; 
 
         let focusedWeekStart = null;
+        let globalData = { teams: [], vacations: [] };
 
         function toDate(str) { return new Date(str + "T00:00:00"); }
         function addDays(date, days) {
@@ -154,7 +126,29 @@
             return clean;
         }
 
+        function isOnVacation(memberName, scaleStartStr, scaleEndStr) {
+            const sStart = toDate(scaleStartStr);
+            const sEnd = toDate(scaleEndStr);
+            
+            for (let v of globalData.vacations) {
+                if (v.name.toUpperCase() === memberName.toUpperCase()) {
+                    const vStart = toDate(v.start);
+                    vStart.setHours(0,0,0,0);
+                    const vEnd = toDate(v.end);
+                    vEnd.setHours(23,59,59,999);
+                    
+                    if (vStart <= sEnd && vEnd >= sStart) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         function buildScales() {
+            const teams = globalData.teams;
+            if (!teams || teams.length === 0) return [];
+
             const anchor = toDate(ANCHOR_SATURDAY);
             const today = new Date();
             const diffWeeks = Math.round((today - anchor) / (7 * 24 * 60 * 60 * 1000));
@@ -164,12 +158,20 @@
                 const saturday = addDays(anchor, i * 7);
                 const sunday = addDays(saturday, 1);
                 const team = teams[((i % teams.length) + teams.length) % teams.length];
+                
+                const startStr = toISO(saturday);
+                const endStr = toISO(sunday);
+
+                const activeMembers = team.members
+                    .filter(m => !isOnVacation(m.name, startStr, endStr))
+                    .map(m => ({ ...m, prefix: team.prefix }));
+
                 scales.push({
-                    start: toISO(saturday),
-                    end: toISO(sunday),
+                    start: startStr,
+                    end: endStr,
                     display: `${fmt(saturday)} e ${fmt(sunday)}/${sunday.getFullYear()}`,
                     prefix: team.prefix,
-                    members: team.members.map(m => ({ ...m, prefix: team.prefix }))
+                    members: activeMembers
                 });
             }
             return scales;
@@ -328,11 +330,27 @@
             }
         }
 
-        const today = new Date();
-        document.getElementById('current-date').textContent = today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-        document.getElementById('header-month').textContent =
-            "CGB Engenharia - " + today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
-        render();
+        // Inicialização: Carrega o JSON do repositório
+        async function init() {
+            const today = new Date();
+            document.getElementById('current-date').textContent = today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('header-month').textContent =
+                "CGB Engenharia - " + today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+
+            try {
+                const response = await fetch('escala_config.json?' + new Date().getTime()); // Evita cache
+                globalData = await response.json();
+                render();
+            } catch (error) {
+                document.getElementById('main-content').innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: red; font-weight: bold;">
+                        Erro ao carregar o arquivo de configuração (escala_config.json). Certifique-se de que ele está na mesma pasta no GitHub.
+                    </div>
+                `;
+            }
+        }
+
+        init();
     </script>
 </body>
 </html>
